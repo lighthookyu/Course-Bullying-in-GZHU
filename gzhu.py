@@ -3,30 +3,11 @@ import requests
 import re
 import execjs
 from lxml import html
-import sys
-import os
-
-
-def get_resource_path(relative_path):
-    """ Get absolute path to resource, works for dev and for PyInstaller """
-    try:
-        # PyInstaller creates a temp folder and stores path in _MEIPASS
-        base_path = sys._MEIPASS
-    except Exception:
-        base_path = os.path.abspath(".")
-
-    return os.path.join(base_path, relative_path)
-
-
-def js_from_file(file_name):
-    with open(file_name, 'r', encoding='UTF-8') as file:
-        result = file.read()
-    return result
 
 
 def get_rsa(un, psd, lt):
-    js_path = get_resource_path(r'des.js')
-    context = execjs.compile(js_from_file(js_path))
+    js_res = requests.get('https://newcas.gzhu.edu.cn/cas/comm/js/des.js')
+    context = execjs.compile(js_res.text)
     result = context.call("strEnc", un + psd + lt, '1', '2', '3')
     return result
 
