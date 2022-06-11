@@ -22,6 +22,7 @@
 如果使用**python**运行，直接git clone整个项目，随后`pip install -r requirements.txt`  
 安装完依赖后`python main.py`运行。  
   
+  
 <font color=#FF0000>win端嫌麻烦可以下载压缩包，然后在解压双击打开`START.bat`即可。</font>  
 
 打开后先输入0配置信息，按照console提示信息输入即可。
