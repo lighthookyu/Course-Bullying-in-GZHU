@@ -100,7 +100,8 @@ class GZHU(object):
 
     def xuan_ke(self):
         """
-        加载教务系统,获取
+        教务系统初始化，需要选课开放的时候才会返回True,
+        获取
             jg_id:32位哈希值
             bh_id:9位数字
 
