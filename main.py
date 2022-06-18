@@ -7,8 +7,8 @@ from datetime import datetime
 
 class Version(object):
     def __init__(self):
-        self.version = '1.2'
-        self.release_date = '2022/01/12'
+        self.version = '1.3'
+        self.release_date = '2022/06/18'
         self.latest_ver = ''
         self.latest_rel_date = ''
 
@@ -18,11 +18,12 @@ class Config(object):
         self.config_ini = configparser.ConfigParser()
         self.file_path = os.path.join(os.path.abspath('.'), '配置信息.ini')
         self.config_ini.read(self.file_path, encoding='utf-8')
-
+a
         base_info = dict(self.config_ini.items('baseinfo'))
         # self.mode1time = base_info['mode1time']
         self.username = base_info['username']
         self.password = base_info['password']
+        self.startTime = base_info['starttime']
 
         # 将三个字典的值str->list
         self.mode1 = self.re_flash('mode1')
@@ -40,26 +41,27 @@ class Config(object):
         return data
 
     def set_config(self):
-        un = input('输入登录融合门户的学号：')
-        pw = input('输入登录融合门户的密码：')
+        un = input('输入登录融合门户的学号 > ')
+        pw = input('输入登录融合门户的密码 > ')
         self.config_ini.set('baseinfo', 'username', un)
         self.config_ini.set('baseinfo', 'password', pw)
 
         while True:
-            md = input('\n1-自动抢课\n2-捡漏模式\n3-替换模式\n输入你使用的模式前面的数字代号：')
-            if ('1' or '2' or '3') not in md:
+            md = input(' 1 - 自动抢课\n 2 - 捡漏模式\n 3 - 替换模式\n 输入你使用的模式前面的数字代号 > ')
+            if md in '123':
                 md = 'mode' + md
                 break
-            print('模式输入错误')
+            else:
+                print('模式输入错误')
 
         i = 1   # 计数器
         while True:
             print('目前正在设置第{}个教学班设置'.format(i))
-            jxb = input('输入你要选的教学班号:').strip()  # 去掉前后空格
-            bl = input('输入该教学班对应的板块(主修/体育/通识):').strip()
+            jxb = input('输入你要选的教学班号 > ').strip()  # 去掉前后空格
+            bl = input('输入该教学班对应的板块:主修/体育/通识  (输入中文文字) > ').strip()
             self.config_ini.set(md, str(i), '{},{}'.format(jxb, bl))
 
-            end_mark = input('输入0结束录入, 输入其他继续录入')
+            end_mark = input('输入0结束录入, 输入其他继续录入 > ')
             if end_mark == '0':
                 self.config_ini.write(open(self.file_path, 'w', encoding='utf-8'))
                 break
@@ -131,37 +133,43 @@ def get_daixuan_info(xuanke_data: dict) -> list:
 
 
 def xuanke1(xuanke_data: dict):
-    daixuan_info = get_daixuan_info(xuanke_data=xuanke_data)
-    try_time = 1
-    while True:
-        print(''.center(30, '='))
-        print('{time}  正在进行第{tt}次轮询'.format(time=datetime.now().strftime('%Y-%m-%d %H:%M:%S'), tt=try_time))
-        for daixuan in daixuan_info:
-            if daixuan['course_name'] == '':
-                print('教学班号:{}查找无结果'.format(daixuan['kch_id']))
-                continue
-            if daixuan['success'] is not True:
-                if (daixuan['totalResult'] < daixuan['jxbrl']) or ('通识' in daixuan['block']):
-                    status, msg = g.post_do_jxb(daixuan)
-                    daixuan['success'] = status
-                    daixuan['msg'] = msg
-                    print('{time}  {cn}选课成功'.format(time=datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-                                                    cn=daixuan['course_name']))
-                else:
-                    daixuan['success'] = True
-                    daixuan['msg'] = '已满且为非通选课，已跳过'
-                    print('{cn}已满且为非通选课，已跳过'.format(cn=daixuan['course_name']))
+    if g.xuan_ke():
+        daixuan_info = get_daixuan_info(xuanke_data=xuanke_data)
+        try_time = 1
+        while True:
+            print(''.center(30, '='))
+            print('{time}  正在进行第{tt}次轮询'.format(time=datetime.now().strftime('%Y-%m-%d %H:%M:%S'), tt=try_time))
+            for daixuan in daixuan_info:
+                if daixuan['course_name'] == '':
+                    print('教学班号:{}查找无结果'.format(daixuan['kch_id']))
                     continue
-        # 判断是否全部选完
-        success_mark = []
-        for daixuan in daixuan_info:
-            success_mark.append(daixuan['success'])
-        if False not in success_mark:
-            print('全部选课完成'.center(30, '='))
-            print_data(daixuan_info)
-            break
-        time.sleep(10)
-        try_time += 1
+                if daixuan['success'] is not True:
+                    if (daixuan['totalResult'] < daixuan['jxbrl']) or ('通识' in daixuan['block']):
+                        status, msg = g.post_do_jxb(daixuan)
+                        daixuan['success'] = status
+                        daixuan['msg'] = msg
+                        print('{time}  {cn}选课成功'.format(time=datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                                                        cn=daixuan['course_name']))
+                    else:
+                        daixuan['success'] = True
+                        daixuan['msg'] = '已满且为非通选课，已跳过'
+                        print('{cn}已满且为非通选课，已跳过'.format(cn=daixuan['course_name']))
+                        continue
+            # 判断是否全部选完
+            success_mark = []
+            for daixuan in daixuan_info:
+                success_mark.append(daixuan['success'])
+            if False not in success_mark:
+                print('全部选课完成'.center(30, '='))
+                print_data(daixuan_info)
+                break
+            time.sleep(10)
+            try_time += 1
+        return
+    else:
+        print('选课系统暂未开放，5s后继续重复调用')
+        time.sleep(5)
+        xuanke1(xuanke_data=xuanke_data)
 
 
 def xuanke2(xuanke_data: dict):
@@ -243,7 +251,7 @@ if __name__ == '__main__':
         os.system('cls')
         print(bannerstr)
         print(menustr)
-        choice_menu = input('\n输入操作前面的数字标号，按回车确定:')
+        choice_menu = input('\n输入操作前面的数字标号，按回车确定 > ')
 
         if choice_menu == '0':
             config = Config()
@@ -252,19 +260,37 @@ if __name__ == '__main__':
             config = Config()
             print('正在登录教务系统中...')
             g = gzhu.GZHU(config.username, config.password)
-            if g.login() and g.xuan_ke():
+            if g.login():
+                # g.xuan_ke() 执行各种初始化操作，但这需要选课系统的开放。
                 print('\n登录成功!当前用户为{un}'.format(un=config.username))
                 while True:
-                    print('1：自动抢课（不推荐）\n2：捡漏模式（推荐）\n3：替换模式（没做）\n99：返回主界面')
-                    choice_xuanke = input('请输入选课模式,按回车确定:')
+                    print('1：自动抢课\n2：捡漏模式（推荐）\n3：替换模式（还没做）\n99：返回主界面')
+                    choice_xuanke = input('请输入选课模式,按回车确定 > ')
                     if choice_xuanke == '1':
-                        xuanke1(config.mode1)
+                        import schedule
+                        schedule.every().day.at(config.startTime).do(xuanke1, xuanke_data=config.mode1)
+                        print('已设定于{}开始抢课'.format(config.startTime))
+                        while True:
+                            schedule.run_pending()
+                            time.sleep(5)
+
                     elif choice_xuanke == '2':
-                        xuanke2(config.mode2)
+                        if g.xuan_ke():
+                            xuanke2(config.mode2)
+                        else:
+                            print('选课系统未开放！')
+                            os.system('pause')
+                            continue
+
                     elif choice_xuanke == '3':
-                        xuanke3(config.mode3)
+                        # xuanke3(config.mode3)
+                        print('模式3还没做!')
+                        os.system('pause')
+                        continue
+
                     elif choice_xuanke == '99':
                         break
+
                     else:
                         print('输入有误!')
                         os.system('pause')
