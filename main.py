@@ -18,7 +18,6 @@ class Config(object):
         self.config_ini = configparser.ConfigParser()
         self.file_path = os.path.join(os.path.abspath('.'), '配置信息.ini')
         self.config_ini.read(self.file_path, encoding='utf-8')
-a
         base_info = dict(self.config_ini.items('baseinfo'))
         # self.mode1time = base_info['mode1time']
         self.username = base_info['username']
@@ -32,7 +31,6 @@ a
 
     def re_flash(self, section: str) -> dict:
         """
-
         :rtype: dict
         """
         data = dict(self.config_ini.items(section))
