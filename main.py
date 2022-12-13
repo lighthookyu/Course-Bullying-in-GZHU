@@ -131,6 +131,7 @@ def get_daixuan_info(xuanke_data: dict) -> list:
 
 
 def xuanke1(xuanke_data: dict):
+    print('正在执行xuanke1'.center(20, '*'))
     if g.xuan_ke():
         daixuan_info = get_daixuan_info(xuanke_data=xuanke_data)
         try_time = 1
