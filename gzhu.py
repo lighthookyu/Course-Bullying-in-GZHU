@@ -76,7 +76,7 @@ class GZHU(object):
 
     def login(self):
         new_cas_url = 'https://newcas.gzhu.edu.cn/cas/login'
-        res = self.client.get(new_cas_url)
+        res = self.client.get(new_cas_url, timeout=None)
         lt = re.findall(r'name="lt" value="(.*)"', res.text)
 
         login_form = {
@@ -88,12 +88,12 @@ class GZHU(object):
             '_eventId': 'submit',
         }
 
-        resp = self.client.post(new_cas_url, data=login_form,)
+        resp = self.client.post(new_cas_url, data=login_form, timeout=None)
         # print('[debug]:{}'.format(resp.url))
         selector = html.fromstring(resp.text)
         if selector.xpath('//title/text()')[0] == '融合门户':
             jwxt_login = 'http://jwxt.gzhu.edu.cn/sso/driot4login'
-            res = self.client.get(url=jwxt_login, headers=self.base_headers)
+            res = self.client.get(url=jwxt_login, headers=self.base_headers, timeout=None)
             return True
         else:
             return False
@@ -111,8 +111,9 @@ class GZHU(object):
 
         jwxt_url = 'http://jwxt.gzhu.edu.cn/jwglxt/xsxk/zzxkyzb_cxZzxkYzbIndex.html?' \
                    'gnmkdm=N253512&layout=default&su={}'.format(self.username)
-        resp = self.client.get(url=jwxt_url, headers=self.base_headers)
-        # print('[debug]:{}'.format(resp))
+        resp = self.client.get(url=jwxt_url, headers=self.base_headers, timeout=None)
+
+        # print('[debug]:{}'.format(resp.text))
 
         if '本学期选课要求' in resp.text:
             selector = html.fromstring(resp.text)
@@ -164,7 +165,7 @@ class GZHU(object):
                     'kspage': '0',
                     'jspage': '0',
                 }
-                resp = self.client.post(url=jwxt_url, data=data, headers=self.base_headers,)
+                resp = self.client.post(url=jwxt_url, data=data, headers=self.base_headers, timeout=None)
                 selector = html.fromstring(resp.text)
                 self.bklx_id = selector.xpath('//input[@name="bklx_id"]/@value')[0]
                 self.rwlx = selector.xpath('//input[@name="rwlx"]/@value')[0]
@@ -235,7 +236,7 @@ class GZHU(object):
                     "jxbzb": self.jxbzb,
                 }
             )
-        resp = self.client.post(url=search_url, data=data, headers=self.base_headers,)
+        resp = self.client.post(url=search_url, data=data, headers=self.base_headers, timeout=None)
         # print('[debug]:{}'.format(resp.url))
         search_result = json.loads(resp.text)['tmpList']
         try:
@@ -301,7 +302,7 @@ class GZHU(object):
             'zyh_id': self.zyh_id,  # 专业代号
         }
         # output = self.change_data(data)
-        resp = self.client.post(url=query_task_url, data=data, headers=self.headers,)
+        resp = self.client.post(url=query_task_url, data=data, headers=self.headers, timeout=None)
         # print(resp)
         kc_result = json.loads(resp.text)
         try:
@@ -351,7 +352,7 @@ class GZHU(object):
             'xxkbj': '0',   # todo 注意这个值
             'zyh_id': self.zyh_id,
         }
-        resp = self.client.post(url=submit_url, data=data, headers=self.base_headers,)
+        resp = self.client.post(url=submit_url, data=data, headers=self.base_headers, timeout=None)
 
         submit_result = json.loads(resp.text)
         if submit_result['flag'] == '1':
