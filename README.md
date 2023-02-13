@@ -31,4 +31,9 @@
 1. 确保您的网络环境正常未使用VPN  
 2. 推测教务系统服务器会因为抢课人数过多导致不能及时返回数据， 比如一直加载但上不去、404、Service Unavailable等报错 。因此建议脚本和手动一起抢课。  **需要注意的是：手选和脚本会互相顶掉登录状态。在选课时注意取舍。**
 3. 不要多开脚本，有可能产生位置问题  
+4. 出现以下字样请安装nodejs  
+
+    execjs. exceptions. RuntimeUnavailableError Could not find an available JavaScript runtime，
+    Failed to execute script main due to unhandled exception
+
 
